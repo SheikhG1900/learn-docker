@@ -1,9 +1,45 @@
+########  setup guacamole start ######
+
+# setup mysql for guacamole with root password 'root'
+docker run --name guac-mysql -e MYSQL_ROOT_PASSWORD='root' -d mysql
+mysql> CREATE USER 'sh' IDENTIFIED BY 'aw';
+mysql> GRANT SELECT,INSERT,UPDATE,DELETE ON guacamole_db.* TO 'sh';
+
+
+# setup postgres for guacamole with root password 'root'
+docker run --name guac-postgres -p 5432:5432 -e POSTGRES_PASSWORD=root -d postgres
+
+
+# generate mysql and postgres script
+docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > initdb.mysql.sql
+docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --postgres > initdb.postgres.sql
+
+# run guacamole server. (guacd)
+docker run --name guacd -d -p 4822:4822 guacamole/guacd
+
+# run guacamole client web application (mysql) 
+docker run --name guacamole --link guacd:guacd --link guac-mysql:mysql -e MYSQL_DATABASE=guacamole_db  -e MYSQL_USER=usr  -e MYSQL_PASSWORD=aw -p 8080:8080 -d guacamole/guacamole
+
+# run guacamole client web application (postgres) 
+docker run --name guacamole --link guacd:guacd --link guac-postgres:postgres -e POSTGRES_DATABASE=guacamole_db  -e POSTGRES_USER=postgres  -e POSTGRES_PASSWORD=root --rm -p 8080:8080 guacamole/guacamole
+
+########  setup guacamole end ######
+
+
+
+
+
+
 #### run container
 docker run -t -i --name mycotainer ubuntu  # interactive with name
 docker run -t -i ubuntu # interactive 
 docker run -p 4000:80 friendlyhello:snapshot # with port mapping
 docker run -d -p 4000:80 friendlyhello:snapshot # with port mapping de-attached
+docker run -e GUACD_LOG_LEVEL=debug -d guacamole/guacd  # -e is env variable.
+docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > initdb.sql # run container for short. --rm means to delete container after it is done.
 
+# use running docker terminal
+docker exec -it some-mysql bash  # run mysql in terminal
 
 #### see containter
 docker ps
@@ -22,6 +58,9 @@ docker stop $(docker ps -a -q) # for linux
 docker ps -a -q # 1- get list of all containder ids.
 docker stop 0ab2490f8d9c 9dff282e510e 99f64a57b68f # 2- stop all by providing list
 
+
+#### copy file to container  ####
+docker cp  ./auth.jsp guacamole:/usr/local/tomcat/webapps/guacamole/auth.jsp
 
 #### docker machine ip
 docker-machine ip
