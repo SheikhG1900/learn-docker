@@ -38,6 +38,13 @@ docker run -d -p 4000:80 friendlyhello:snapshot # with port mapping de-attached
 docker run -e GUACD_LOG_LEVEL=debug -d guacamole/guacd  # -e is env variable.
 docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > initdb.sql # run container for short. --rm means to delete container after it is done.
 
+
+### mount storage ####
+docker volume create temp  # create volume with name, temp
+docker volume inspect temp # inpect volume
+docker run --mount source=temp,target=/path/of/container some-image # mount valume to a contanier inside path 
+docker volume rm virtualenv # remove volume
+docker run -v /host/path:/container/path -p 8069:8069 --name odoo --link db:db -t odoo # run container with mounted valume host/path:container/path
 # use running docker terminal
 docker exec -it some-mysql bash  # run mysql in terminal
 
