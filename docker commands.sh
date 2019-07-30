@@ -1,3 +1,6 @@
+### tomcat ###
+docker run -v E:\officeWork\docker-tomcat-deployment:/usr/local/tomcat/webapps --name tomcat  -it --rm -p 8888:8080 tomcat:8.0
+
 ########  setup guacamole start ######
 
 # setup mysql for guacamole with root password 'root'
